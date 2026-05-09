@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOCIAL CONTRACT</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+:root {
+  --bg:        #f8f5f0;
+  --surface:   #f2ede6;
+  --panel:     #ebe4d8;
+  --border:    #d4c8b4;
+  --border-hi: #b8a888;
+  --text:      #1a1610;
+  --muted:     #7a6a50;
+  --faint:     #b0a080;
+  --dim:       #ddd0bc;
+
+  --ink:       #12100c;
+  --red:       #8b1a1a;
+  --red-dim:   rgba(139,26,26,0.08);
+  --blue:      #1a3a6b;
+  --blue-dim:  rgba(26,58,107,0.07);
+  --green:     #1a5a2a;
+  --green-dim: rgba(26,90,42,0.07);
+
+  --self:      #2a4a7a;
+  --role:      #6b2a1a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Source Serif 4', serif;
+  font-weight: 300;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Paper grain */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 512px;
+  pointer-events: none; z-index: 0; mix-blend-mode: multiply;
+}
+
+.screen { display: none; position: relative; z-index: 1; }
+.screen.active { display: flex; }
+
+/* Progress */
+.prog-wrap {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 1px; background: var(--dim); z-index: 200;
+}
+.prog-fill {
+  height: 100%; background: var(--ink);
+  transition: width 0.8s ease; width: 0%;
+}
+
+/* ── INTRO ── */
+#intro {
+  min-height: 100vh; flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(2.5rem, 6vw, 5rem);
+  max-width: 820px; margin: 0 auto; width: 100%;
+}
+
+.intro-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 2rem; border-bottom: 1px solid var(--border);
+}
+
+.intro-kicker {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem; letter-spacing: 0.26em;
+  text-transform: uppercase; color: var(--faint); line-height: 2;
+}
+
+.intro-ref {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.46rem; letter-spacing: 0.14em;
+  color: var(--dim); text-align: right; line-height: 2;
+}
+
+.intro-body {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center; padding: 4rem 0 3rem;
+}
+
+.intro-title {
+  font-family: 'Source Serif 4', serif;
+  font-weight: 300; font-size: clamp(2.8rem, 7vw, 6rem);
+  line-height: 0.9; letter-spacing: -0.02em;
+  color: var(--ink); margin-bottom: 0.3rem;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+.intro-tagline {
+  font-family: 'Source Serif 4', serif;
+  font-style: italic; font-weight: 300;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: var(--muted); margin-bottom: 3rem;
+}
+
+.intro-premise {
+  font-size: clamp(0.88rem, 1.8vw, 1rem);
+  line-height: 2; color: var(--muted);
+  max-width: 500px; margin-bottom: 3rem;
+}
+.intro-premise strong { color: var(--text); font-weight: 400; }
+
+/* Two-mode preview */
+.mode-preview {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--border); margin-bottom: 3rem;
+  background: var(--surface);
+}
+
+.mode-col {
+  padding: 1rem 1.2rem;
+  border-right: 1px solid var(--border);
+}
+.mode-col:last-child { border-right: none; }
+
+.mode-col-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.46rem; letter-spacing: 0.22em;
+  text-transform: uppercase; margin-bottom: 0.5rem;
+}
+.mode-col.role-col .mode-col-label { color: var(--role); }
+.mode-col.self-col .mode-col-label { color: var(--self); }
+
+.mode-col-desc {
+  font-size: 0.82rem; color: var(--muted); line-height: 1.7;
+}
+
+.begin-btn {
+  background: var(--ink); color: var(--bg);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.56rem; letter-spacing: 0.26em;
+  text-transform: uppercase; padding: 0.9rem 2.2rem;
+  border: none; cursor: pointer; transition: background 0.2s;
+  display: inline-block; align-self: flex-start;
+}
+.begin-btn:hover { background: var(--red); }
+
+.intro-footer {
+  padding-top: 1.5rem; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between;
+  flex-wrap: wrap; gap: 0.5rem;
+}
+.intro-footer-note {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.44rem; letter-spacing: 0.1em; color: var(--faint);
+}
+
+/* ── PROFILE SCREEN ── */
+#profile {
+  min-height: 100vh; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: clamp(2rem, 6vw, 5rem);
+  text-align: center;
+}
+
+.profile-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--faint); margin-bottom: 2rem;
+}
+
+.profile-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--role);
+  padding: 2rem 2.5rem;
+  max-width: 520px; width: 100%;
+  text-align: left; margin-bottom: 2.5rem;
+  box-shadow: 4px 4px 0 var(--dim);
+}
+
+.profile-name {
+  font-family: 'Source Serif 4', serif;
+  font-weight: 600; font-size: 1.4rem;
+  color: var(--role); margin-bottom: 0.3rem;
+  letter-spacing: 0.02em;
+}
+
+.profile-descriptor {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.52rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--faint);
+  margin-bottom: 1.5rem;
+}
+
+.profile-fields { display: flex; flex-direction: column; gap: 0.6rem; }
+
+.profile-field {
+  display: flex; gap: 1rem; align-items: flex-start;
+  padding: 0.5rem 0; border-bottom: 1px solid var(--dim);
+  font-size: 0.85rem; line-height: 1.6;
+}
+.profile-field:last-child { border-bottom: none; }
+
+.pf-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.46rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--faint);
+  min-width: 90px; flex-shrink: 0; padding-top: 0.15rem;
+}
+
+.pf-value { color: var(--text); }
+
+.profile-note {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem; letter-spacing: 0.12em;
+  color: var(--muted); max-width: 520px; line-height: 1.8;
+  margin-bottom: 2rem; text-align: left;
+}
+
+/* ── DILEMMA SCREEN ── */
+#dilemma {
+  min-height: 100vh; flex-direction: column;
+  justify-content: center;
+  padding: clamp(2.5rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+  max-width: 780px; margin: 0 auto; width: 100%;
+}
+
+.dilemma-hud {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 3rem; padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.hud-left { display: flex; flex-direction: column; gap: 0.2rem; }
+
+.hud-mode {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.46rem; letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.hud-mode.role-mode { color: var(--role); }
+.hud-mode.self-mode { color: var(--self); }
+
+.hud-who {
+  font-family: 'Source Serif 4', serif;
+  font-style: italic; font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.hud-counter {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.48rem; letter-spacing: 0.18em;
+  color: var(--faint);
+}
+
+/* Dilemma text */
+.dilemma-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.46rem; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--faint);
+  margin-bottom: 1rem;
+}
+
+.dilemma-text {
+  font-family: 'Source Serif 4', serif;
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 300; line-height: 1.5;
+  color: var(--ink); margin-bottom: 0.6rem;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.dilemma-text.visible { opacity: 1; transform: translateY(0); }
+
+.dilemma-context {
+  font-size: 0.82rem; font-style: italic;
+  color: var(--muted); line-height: 1.7;
+  margin-bottom: 2.5rem;
+  opacity: 0; transition: opacity 0.4s ease 0.1s;
+}
+.dilemma-context.visible { opacity: 1; }
+
+/* Role reminder */
+.role-reminder {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--role);
+  padding: 0.7rem 1rem; margin-bottom: 2rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem; letter-spacing: 0.1em;
+  color: var(--muted); line-height: 1.8;
+  opacity: 0; transition: opacity 0.4s ease 0.15s;
+}
+.role-reminder.visible { opacity: 1; }
+.role-reminder.hidden { display: none; }
+.role-reminder strong { color: var(--role); font-weight: 400; }
+
+/* Stance */
+.stance-section {
+  opacity: 0; transform: translateY(5px);
+  transition: opacity 0.45s ease 0.15s, transform 0.45s ease 0.15s;
+  margin-bottom: 1.5rem;
+}
+.stance-section.visible { opacity: 1; transform: translateY(0); }
+
+.stance-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.46rem; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 0.7rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.stance-label::after { content: ''; flex: 1; height: 1px; background: var(--dim); }
+
+.stance-options { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1.2rem; }
+
+.stance-btn {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--muted); font-family: 'Source Serif 4', serif;
+  font-size: 0.82rem; font-weight: 300;
+  padding: 0.65rem 1rem; text-align: left;
+  cursor: pointer; transition: all 0.16s; line-height: 1.5;
+}
+.stance-btn:hover { border-color: var(--border-hi); color: var(--text); }
+.stance-btn.selected-support { border-color: var(--green); color: var(--green); background: var(--green-dim); border-left: 3px solid var(--green); }
+.stance-btn.selected-oppose  { border-color: var(--red);   color: var(--red);   background: var(--red-dim);   border-left: 3px solid var(--red); }
+.stance-btn.selected-qualify { border-color: var(--border-hi); color: var(--text); background: var(--panel); border-left: 3px solid var(--faint); }
+
+.reason-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.46rem; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 0.6rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.reason-label::after { content: ''; flex: 1; height: 1px; background: var(--dim); }
+
+.reason-input {
+  width: 100%; background: transparent;
+  border: none; border-bottom: 1px solid var(--border);
+  color: var(--ink); font-family: 'Source Serif 4', serif;
+  font-size: 0.9rem; font-weight: 300;
+  padding: 0.6rem 0; resize: none; outline: none;
+  line-height: 1.85; transition: border-color 0.3s;
+  min-height: 70px;
+}
+.reason-input:focus { border-bottom-color: var(--ink); }
+.reason-input::placeholder { color: var(--faint); font-style: italic; }
+.reason-input.role-input:focus { border-bottom-color: var(--role); }
+.reason-input.self-input:focus { border-bottom-color: var(--self); }
+
+.input-hint {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.44rem; letter-spacing: 0.1em;
+  color: var(--faint); margin-top: 0.35rem; min-height: 1em;
+}
+
+/* Nav */
+.dilemma-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 1.5rem; margin-top: 1rem;
+  border-top: 1px solid var(--dim);
+}
+
+.nav-note {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.44rem; letter-spacing: 0.1em; color: var(--faint);
+}
+
+.nav-btn {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); font-family: 'DM Mono', monospace;
+  font-size: 0.54rem; letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 0.55rem 1.2rem; cursor: pointer; transition: all 0.18s;
+}
+.nav-btn:hover:not(:disabled) { border-color: var(--border-hi); color: var(--text); }
+.nav-btn:disabled { opacity: 0.18; cursor: default; pointer-events: none; }
+.nav-btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.nav-btn.primary:hover { background: var(--red); border-color: var(--red); }
+
+/* Transition screen */
+#transition {
+  min-height: 100vh; flex-direction: column;
+  justify-content: center; align-items: center;
+  padding: clamp(2rem, 6vw, 5rem); text-align: center;
+}
+
+.transition-heading {
+  font-family: 'Source Serif 4', serif;
+  font-weight: 300; font-size: clamp(1.5rem, 4vw, 2.5rem);
+  color: var(--ink); margin-bottom: 1rem; letter-spacing: -0.01em;
+}
+
+.transition-body {
+  font-size: 0.88rem; color: var(--muted);
+  line-height: 1.9; max-width: 400px; margin-bottom: 2.5rem;
+}
+
+/* Processing */
+.processing {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.48rem; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase;
+}
+.dots-inline { display: inline-flex; gap: 0.25rem; margin-left: 0.35rem; vertical-align: middle; }
+.dots-inline span {
+  width: 3px; height: 3px; background: var(--muted); border-radius: 50%;
+  animation: dp 1.2s ease-in-out infinite;
+}
+.dots-inline span:nth-child(2) { animation-delay: 0.2s; }
+.dots-inline span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dp {
+  0%,100% { opacity: 0.2; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* Reading */
+#reading {
+  min-height: 100vh; flex-direction: column; justify-content: center;
+  padding: clamp(2rem, 6vw, 5rem); max-width: 780px; margin: 0 auto; width: 100%;
+}
+.reading-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.48rem; letter-spacing: 0.32em;
+  color: var(--faint); text-transform: uppercase; margin-bottom: 1.5rem;
+}
+.reading-dots { display: flex; gap: 0.45rem; }
+.reading-dots span {
+  width: 5px; height: 5px; border-radius: 0; background: var(--ink);
+  animation: dp 1.4s ease-in-out infinite;
+}
+.reading-dots span:nth-child(2) { animation-delay: 0.25s; }
+.reading-dots span:nth-child(3) { animation-delay: 0.5s; }
+
+/* ── RESULT ── */
+#result {
+  min-height: 100vh; flex-direction: column; justify-content: flex-start;
+  padding: clamp(4rem, 8vw, 6rem) clamp(1.5rem, 5vw, 4rem) 7rem;
+  max-width: 780px; margin: 0 auto; width: 100%;
+}
+
+.result-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 3rem; padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-title {
+  font-family: 'Source Serif 4', serif;
+  font-weight: 300; font-size: 1.1rem;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
+}
+
+.result-stamp {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.42rem; letter-spacing: 0.1em;
+  color: var(--faint); text-align: right; line-height: 2; white-space: pre;
+}
+
+/* Comparison table */
+.comparison {
+  border: 1px solid var(--border); margin-bottom: 3rem;
+  opacity: 0; transition: opacity 1s ease;
+}
+.comparison.visible { opacity: 1; }
+
+.comp-dilemma {
+  border-bottom: 1px solid var(--dim);
+}
+.comp-dilemma:last-child { border-bottom: none; }
+
+.comp-header {
+  padding: 0.55rem 1.2rem; background: var(--panel);
+  border-bottom: 1px solid var(--dim);
+  display: flex; justify-content: space-between;
+}
+
+.comp-q {
+  font-size: 0.78rem; font-weight: 400; color: var(--text);
+}
+
+.comp-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.42rem; color: var(--faint); letter-spacing: 0.1em;
+}
+
+.comp-cols {
+  display: grid; grid-template-columns: 1fr 1px 1fr;
+}
+
+.comp-col {
+  padding: 0.75rem 1.2rem; background: var(--surface);
+}
+.comp-col.self-col { background: var(--bg); }
+
+.comp-col-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.42rem; letter-spacing: 0.16em;
+  text-transform: uppercase; margin-bottom: 0.35rem;
+}
+.comp-col.role-col .comp-col-label { color: var(--role); }
+.comp-col.self-col .comp-col-label { color: var(--self); }
+
+.comp-stance {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.5rem; letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 0.3rem;
+}
+.stance-support { color: var(--green); }
+.stance-oppose  { color: var(--red); }
+.stance-qualify { color: var(--faint); }
+
+.comp-reason {
+  font-size: 0.82rem; color: var(--text); line-height: 1.7;
+}
+
+.comp-col-divider { background: var(--border); }
+
+/* Analysis */
+.analysis-rule {
+  width: 0; height: 1px; background: var(--ink);
+  margin-bottom: 2.5rem;
+  opacity: 0; transition: opacity 0.6s ease, width 1.2s ease 0.3s;
+}
+.analysis-rule.visible { opacity: 1; width: 100%; }
+
+.analysis-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.46rem; letter-spacing: 0.26em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 1.2rem;
+  opacity: 0; transition: opacity 0.6s ease;
+}
+.analysis-label.visible { opacity: 1; }
+
+.analysis-headline {
+  font-family: 'Source Serif 4', serif;
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  font-weight: 300; line-height: 1.25; color: var(--ink);
+  margin-bottom: 1.5rem;
+  opacity: 0; transition: opacity 0.8s ease;
+}
+.analysis-headline.visible { opacity: 1; }
+
+.analysis-body {
+  font-family: 'Source Serif 4', serif;
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+  line-height: 2.1; color: var(--text); white-space: pre-wrap;
+  opacity: 0; transition: opacity 1.2s ease;
+}
+.analysis-body.visible { opacity: 1; }
+
+.analysis-sig {
+  font-family: 'Source Serif 4', serif;
+  font-style: italic; font-size: clamp(0.9rem, 1.6vw, 1rem);
+  line-height: 1.9; color: var(--muted);
+  border-left: 1px solid var(--border); padding-left: 1.2rem;
+  margin-top: 1.5rem;
+  opacity: 0; transition: opacity 0.8s ease;
+}
+.analysis-sig.visible { opacity: 1; }
+
+.disc-wrap {
+  margin-top: 2.5rem; border: 1px solid var(--border);
+  opacity: 0; transition: opacity 0.8s ease;
+}
+.disc-wrap.visible { opacity: 1; }
+
+.disc-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.55rem 1.2rem; background: var(--panel);
+  border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0.4rem;
+}
+.disc-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.44rem; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--muted);
+}
+.disc-note {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.4rem; letter-spacing: 0.1em; color: var(--faint);
+}
+.disc-item {
+  display: flex; gap: 0.8rem; align-items: flex-start;
+  padding: 0.8rem 1.2rem; border-bottom: 1px solid var(--dim);
+  background: var(--surface);
+}
+.disc-item:last-child { border-bottom: none; }
+.disc-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.42rem; color: var(--faint); flex-shrink: 0; padding-top: 0.2rem;
+}
+.disc-q {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.92rem; color: var(--text); line-height: 1.7;
+}
+
+.result-footer {
+  margin-top: 3.5rem; padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 0.8rem;
+  opacity: 0; transition: opacity 0.8s ease;
+}
+.result-footer.visible { opacity: 1; }
+.footer-note {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.44rem; letter-spacing: 0.1em; color: var(--faint); font-style: italic;
+}
+.footer-btns { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.result-btn {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--muted); font-family: 'DM Mono', monospace;
+  font-size: 0.5rem; letter-spacing: 0.18em; text-transform: uppercase;
+  padding: 0.5rem 1rem; cursor: pointer; transition: all 0.2s;
+}
+.result-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+@media (max-width: 580px) {
+  .mode-preview { grid-template-columns: 1fr; }
+  .mode-col { border-right: none; border-bottom: 1px solid var(--border); }
+  .mode-col:last-child { border-bottom: none; }
+  .comp-cols { grid-template-columns: 1fr; }
+  .comp-col-divider { height: 1px; width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <div class="intro-header">
+    <div class="intro-kicker">Civic Simulation · Grades 11–12<br>Individual &amp; Society</div>
+    <div class="intro-ref" id="sessionId"></div>
+  </div>
+
+  <div class="intro-body">
+    <div class="intro-title">Social<br>Contract</div>
+    <div class="intro-tagline">The contract is not experienced equally by everyone asked to uphold it.</div>
+
+    <p class="intro-premise">
+      You will be assigned a civic profile — an age, an occupation, a legal status, a set of constraints and stakes.<br><br>
+      You will answer five civic dilemmas <strong>as that person</strong>.<br>
+      Then you will answer the same dilemmas <strong>as yourself</strong>.<br><br>
+      The gap between the two sets of answers will be read — not as proof of how structural position shapes reasoning, but as evidence of <strong>how you imagine it does</strong>.<br><br>
+      <em>That imagination is itself worth examining.</em>
+    </p>
+
+    <div class="mode-preview">
+      <div class="mode-col role-col">
+        <div class="mode-col-label">In role</div>
+        <div class="mode-col-desc">You reason from an assigned position — imagining its specific income, legal status, constraints, and stakes.</div>
+      </div>
+      <div class="mode-col self-col">
+        <div class="mode-col-label">As yourself</div>
+        <div class="mode-col-desc">You answer again from your own position. The gap reveals how you imagine structural position shapes civic reasoning — which is itself a form of political knowledge.</div>
+      </div>
+    </div>
+
+    <button class="begin-btn" onclick="begin()">Receive your profile →</button>
+  </div>
+
+  <div class="intro-footer">
+    <div class="intro-footer-note">The contract you defend depends on the position from which you are asked to imagine it.</div>
+    <div class="intro-footer-note" id="introSessionNote"></div>
+  </div>
+</div>
+
+<!-- PROFILE REVEAL -->
+<div id="profile" class="screen">
+  <div class="profile-eyebrow">Your assigned civic profile</div>
+  <div class="profile-card" id="profileCard">
+    <div class="profile-name" id="profileName"></div>
+    <div class="profile-descriptor" id="profileDescriptor"></div>
+    <div class="profile-fields" id="profileFields"></div>
+  </div>
+  <p class="profile-note" id="profileNote"></p>
+  <button class="begin-btn" onclick="startDilemmas('role')">Begin the dilemmas →</button>
+</div>
+
+<!-- DILEMMA -->
+<div id="dilemma" class="screen">
+  <div class="dilemma-hud">
+    <div class="hud-left">
+      <div class="hud-mode" id="hudMode"></div>
+      <div class="hud-who" id="hudWho"></div>
+    </div>
+    <div class="hud-counter" id="hudCounter"></div>
+  </div>
+
+  <div class="dilemma-label">Dilemma</div>
+  <div class="dilemma-text" id="dilemmaText"></div>
+  <div class="dilemma-context" id="dilemmaContext"></div>
+  <div class="role-reminder" id="roleReminder"></div>
+
+  <div class="stance-section" id="stanceSection">
+    <div class="stance-label">Your position</div>
+    <div class="stance-options" id="stanceOptions"></div>
+
+    <div class="reason-label">Your reasoning</div>
+    <textarea class="reason-input" id="reasonInput"
+      placeholder="Explain your position. Why does it make sense from where you stand?"
+      rows="3" oninput="onReasonType()"></textarea>
+    <div class="input-hint" id="reasonHint"></div>
+  </div>
+
+  <div class="dilemma-nav">
+    <div class="nav-note" id="navNote"></div>
+    <button class="nav-btn primary" id="nextBtn" onclick="nextDilemma()" disabled>Next →</button>
+  </div>
+</div>
+
+<!-- TRANSITION -->
+<div id="transition" class="screen">
+  <div class="transition-heading">Now answer as yourself.</div>
+  <p class="transition-body">
+    You have completed the five dilemmas as your assigned profile.<br><br>
+    The same five dilemmas will now appear again.<br>
+    Answer from your own position — your actual age, income, legal status, and situation.
+  </p>
+  <button class="begin-btn" onclick="startDilemmas('self')">Continue →</button>
+</div>
+
+<!-- READING -->
+<div id="reading" class="screen">
+  <div class="reading-label">Reading the contract</div>
+  <div class="reading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="result-header">
+    <div class="result-title">Social Contract — Civic Record</div>
+    <div class="result-stamp" id="resultStamp"></div>
+  </div>
+
+  <div class="comparison" id="comparison"></div>
+
+  <div class="analysis-rule" id="analysisRule"></div>
+  <div class="analysis-label" id="analysisLabel">Reading</div>
+  <div class="analysis-headline" id="analysisHeadline"></div>
+  <div class="analysis-body" id="analysisBody"></div>
+  <div class="analysis-sig" id="analysisSig"></div>
+
+  <div class="disc-wrap" id="discWrap">
+    <div class="disc-header">
+      <div class="disc-label">For discussion</div>
+      <div class="disc-note">Derived from this civic record · for teacher use</div>
+    </div>
+    <div id="discList"></div>
+  </div>
+
+  <div class="result-footer" id="resultFooter">
+    <div class="footer-note">The contract you defended depended on the position from which you were asked to imagine it.</div>
+    <div class="footer-btns">
+      <button class="result-btn" onclick="window.print()">Save / Print</button>
+      <button class="result-btn" onclick="restart()">Start again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PROXY = "https://anthropic-proxy.justin-steinmetz.workers.dev";
+
+// ── CURATED CIVIC PROFILES ──
+// Covers the structural spectrum: wealth, poverty, migration status,
+// disability, age, employment precarity, institutional power
+const PROFILES = [
+  {
+    name: "Mariam, 34",
+    descriptor: "Single parent / Warehouse worker",
+    fields: [
+      { label: "Employment", value: "Part-time warehouse operative, two jobs" },
+      { label: "Income", value: "Just above minimum wage — no benefits, no sick pay" },
+      { label: "Family", value: "Two children, ages 4 and 7. No co-parent." },
+      { label: "Legal status", value: "Citizen" },
+      { label: "Major constraint", value: "Childcare costs consume 40% of income. No car." },
+      { label: "Major stake", value: "School quality. Public transport. Affordable housing." }
+    ],
+    note: "Mariam works two jobs and still cannot save. The civic contract asks her to pay taxes, comply with regulations, and vote. She has never missed a shift."
+  },
+  {
+    name: "Edward, 67",
+    descriptor: "Retired / Former factory manager",
+    fields: [
+      { label: "Employment", value: "Retired. State pension + small private pension." },
+      { label: "Income", value: "Modest but stable. Owns his home outright." },
+      { label: "Family", value: "Widowed. Two adult children in different cities." },
+      { label: "Legal status", value: "Citizen" },
+      { label: "Major constraint", value: "Limited mobility. NHS waiting list for hip surgery." },
+      { label: "Major stake", value: "Healthcare. Pension security. Local community services." }
+    ],
+    note: "Edward worked for 45 years and paid into the system throughout. He now depends on it. He worries the contract he honoured will not be honoured in return."
+  },
+  {
+    name: "Viktor, 28",
+    descriptor: "Gig economy courier",
+    fields: [
+      { label: "Employment", value: "Self-employed delivery driver — classified as contractor" },
+      { label: "Income", value: "Variable. No holiday pay, sick pay, or pension contributions." },
+      { label: "Family", value: "Single. Renting a room in a shared house." },
+      { label: "Legal status", value: "EU citizen — settled status post-Brexit" },
+      { label: "Major constraint", value: "No employment rights. Algorithm controls earnings." },
+      { label: "Major stake", value: "Employment law. Workers' rights. Housing costs." }
+    ],
+    note: "Viktor pays taxes and National Insurance but is classified as self-employed. The contract asks for contribution; it does not guarantee protection."
+  },
+  {
+    name: "Amara, 22",
+    descriptor: "Asylum seeker / Former teacher",
+    fields: [
+      { label: "Employment", value: "Prohibited from working while claim is processed" },
+      { label: "Income", value: "£49.18 per week government allowance" },
+      { label: "Family", value: "Arrived alone. Husband remains in country of origin." },
+      { label: "Legal status", value: "Asylum claim pending — 18 months so far" },
+      { label: "Major constraint", value: "Cannot work, cannot vote, uncertain housing." },
+      { label: "Major stake", value: "Right to remain. Safety. The outcome of the claim." }
+    ],
+    note: "Amara is subject to the laws of this country but has no voice within them. She is asked to trust a system she cannot participate in."
+  },
+  {
+    name: "Richard, 51",
+    descriptor: "CEO / Multinational corporation",
+    fields: [
+      { label: "Employment", value: "Chief Executive, technology firm. 3,200 employees." },
+      { label: "Income", value: "£1.4 million annually. Significant share options." },
+      { label: "Family", value: "Married. Three children in private school." },
+      { label: "Legal status", value: "Citizen" },
+      { label: "Major constraint", value: "Shareholder pressure to maximise returns." },
+      { label: "Major stake", value: "Tax policy. Regulation. Labour law flexibility." }
+    ],
+    note: "Richard employs thousands and pays significant tax. He also lobbies against regulation and structures his company to minimise its tax liability legally."
+  },
+  {
+    name: "Priya, 19",
+    descriptor: "University student / Part-time retail",
+    fields: [
+      { label: "Employment", value: "12 hours/week retail — minimum wage" },
+      { label: "Income", value: "Student loan + part-time work. £1,200 rent per month." },
+      { label: "Family", value: "First-generation university student. Parents in another city." },
+      { label: "Legal status", value: "Citizen" },
+      { label: "Major constraint", value: "Student debt accumulating. Cannot afford to fail." },
+      { label: "Major stake", value: "Tuition fees. Housing costs. Graduate employment." }
+    ],
+    note: "Priya is being asked to invest in a future the contract may not deliver. She will graduate with significant debt into an uncertain labour market."
+  },
+  {
+    name: "James, 44",
+    descriptor: "Recently unemployed / Former factory worker",
+    fields: [
+      { label: "Employment", value: "Made redundant 4 months ago — factory closure" },
+      { label: "Income", value: "Universal Credit. Savings depleting rapidly." },
+      { label: "Family", value: "Married. Two teenagers. Mortgage with 9 years remaining." },
+      { label: "Legal status", value: "Citizen" },
+      { label: "Major constraint", value: "Skills not transferable to local job market." },
+      { label: "Major stake", value: "Unemployment benefits. Retraining. Job creation." }
+    ],
+    note: "James followed the rules — worked, paid taxes, saved. The factory moved offshore. The contract did not anticipate this, or did not care."
+  },
+  {
+    name: "Sophia, 38",
+    descriptor: "Disabled / Dependent on public services",
+    fields: [
+      { label: "Employment", value: "Part-time remote work — limited hours due to condition" },
+      { label: "Income", value: "Disability benefit + part-time income. Below average." },
+      { label: "Family", value: "Lives with partner who provides some care." },
+      { label: "Legal status", value: "Citizen" },
+      { label: "Major constraint", value: "Access to services, transport, and housing not designed for her." },
+      { label: "Major stake", value: "Disability benefits. Accessible infrastructure. Healthcare." }
+    ],
+    note: "Sophia navigates a civic infrastructure built without her in mind. She contributes to and depends on a contract that often treats her as an afterthought."
+  },
+  {
+    name: "David, 58",
+    descriptor: "Rural farmer",
+    fields: [
+      { label: "Employment", value: "Arable farmer — third generation family farm" },
+      { label: "Income", value: "Variable. Dependent on subsidies and weather." },
+      { label: "Family", value: "Married. Adult children who have moved to cities." },
+      { label: "Legal status", value: "Citizen" },
+      { label: "Major constraint", value: "Post-Brexit subsidy changes. Rising input costs. Drought risk." },
+      { label: "Major stake", value: "Agricultural policy. Trade agreements. Rural infrastructure." }
+    ],
+    note: "David feeds the country and depends on policies made by people who have never worked his land. The contract he relies on is written in cities."
+  },
+  {
+    name: "Fatima, 16",
+    descriptor: "Secondary school student / Climate activist",
+    fields: [
+      { label: "Employment", value: "Student. Occasional weekend work at a café." },
+      { label: "Income", value: "Dependent on family. Small part-time income." },
+      { label: "Family", value: "Second-generation immigrant family. Three siblings." },
+      { label: "Legal status", value: "Citizen" },
+      { label: "Major constraint", value: "Too young to vote. No formal political power." },
+      { label: "Major stake", value: "Climate policy. Education. Her generation's future." }
+    ],
+    note: "Fatima will live longest with the consequences of today's decisions. She is subject to the contract but cannot yet vote on it. She protests instead."
+  },
+  {
+    name: "Chen, 45",
+    descriptor: "Small business owner / Immigrant",
+    fields: [
+      { label: "Employment", value: "Owns a restaurant — 8 employees" },
+      { label: "Income", value: "Profitable in good years. Debt-dependent. Margins thin." },
+      { label: "Family", value: "Married with one child. Parents visit on tourist visas." },
+      { label: "Legal status", value: "Permanent resident — not yet eligible for citizenship" },
+      { label: "Major constraint", value: "Cannot vote. Business dependent on immigration policy." },
+      { label: "Major stake", value: "Immigration law. Business regulation. Visa policy for family." }
+    ],
+    note: "Chen has built a business, employed citizens, paid taxes for 12 years. He has no vote. The contract accepts his contribution and denies him a voice."
+  },
+  {
+    name: "Eleanor, 72",
+    descriptor: "Retired teacher / Community volunteer",
+    fields: [
+      { label: "Employment", value: "Retired. State pension + small occupational pension." },
+      { label: "Income", value: "Comfortable. House paid off. Modest savings." },
+      { label: "Family", value: "Widowed. Grandchildren nearby." },
+      { label: "Legal status", value: "Citizen" },
+      { label: "Major constraint", value: "Increasing health needs. Dependent on NHS and social care." },
+      { label: "Major stake", value: "NHS. Social care. Intergenerational fairness." }
+    ],
+    note: "Eleanor spent her career serving the public. She now volunteers three days a week and worries the social fabric she helped build is thinning."
+  }
+];
+
+// ── DILEMMAS ──
+// Five. Each neutral in framing. Genuinely hard across different positions.
+const DILEMMAS = [
+  {
+    q: "The government proposes raising income tax by 3% on all earners above the median wage to fund expanded public services — healthcare, social care, and public transport.",
+    context: "Supporters argue this reduces inequality and strengthens shared infrastructure. Opponents argue it penalises success and discourages investment.",
+    stances: [
+      { id: 'support', label: "Support — the investment is necessary and the cost is fair." },
+      { id: 'oppose',  label: "Oppose — the burden should fall differently, or be funded another way." },
+      { id: 'qualify', label: "Support in principle, but with conditions or reservations." }
+    ]
+  },
+  {
+    q: "A proposed law would require all citizens aged 18–65 to complete 12 months of civic service — teaching, healthcare, environmental work, or defence — at some point in their lives.",
+    context: "Advocates say shared service builds cohesion and distributes burden fairly. Critics argue it is coercive and falls hardest on those with fewest choices.",
+    stances: [
+      { id: 'support', label: "Support — shared obligation is core to the social contract." },
+      { id: 'oppose',  label: "Oppose — compulsory service is coercive and structurally unfair." },
+      { id: 'qualify', label: "Support a voluntary version, or support it with significant exemptions." }
+    ]
+  },
+  {
+    q: "A new policy would restrict immigration significantly — reducing all categories of migration by 60% — citing pressure on public services and housing.",
+    context: "Proponents say the restriction protects existing residents' access to services. Critics argue it scapegoats migrants, harms the economy, and raises humanitarian concerns.",
+    stances: [
+      { id: 'support', label: "Support — managed reduction is a legitimate civic priority." },
+      { id: 'oppose',  label: "Oppose — the policy is unjust and based on false premises." },
+      { id: 'qualify', label: "Some reform is reasonable, but not at this scale or framed this way." }
+    ]
+  },
+  {
+    q: "The government proposes removing Universal Basic Services — free healthcare, free education, and subsidised housing — replacing them with means-tested benefits and a larger private sector.",
+    context: "Advocates argue this is more efficient and rewards self-reliance. Critics argue it dismantles shared infrastructure that makes civic life possible.",
+    stances: [
+      { id: 'support', label: "Support — a more targeted system is fairer and more sustainable." },
+      { id: 'oppose',  label: "Oppose — universal services are the foundation of civic equality." },
+      { id: 'qualify', label: "Some reform is reasonable, but full privatisation goes too far." }
+    ]
+  },
+  {
+    q: "A proposed law would require all companies operating in this country to pay a minimum effective tax rate of 25% — closing all avoidance loopholes — regardless of where they are officially headquartered.",
+    context: "Supporters say this ensures corporations contribute proportionately to the infrastructure they use. Opponents argue it will drive businesses and investment overseas.",
+    stances: [
+      { id: 'support', label: "Support — corporations should pay their share unconditionally." },
+      { id: 'oppose',  label: "Oppose — the economic risk outweighs the revenue gain." },
+      { id: 'qualify', label: "Support the principle, but the implementation needs adjustment." }
+    ]
+  }
+];
+
+// ── STATE ──
+let assignedProfile = null;
+let currentMode = 'role'; // 'role' | 'self'
+let currentDilemma = 0;
+let roleAnswers = new Array(DILEMMAS.length).fill(null).map(() => ({ stance: null, reason: '' }));
+let selfAnswers = new Array(DILEMMAS.length).fill(null).map(() => ({ stance: null, reason: '' }));
+let selectedStance = null;
+
+const sessionId = 'SC-' + Math.random().toString(36).slice(2,4).toUpperCase() + '-' +
+                           Math.random().toString(36).slice(2,4).toUpperCase();
+
+document.getElementById('sessionId').textContent = sessionId;
+document.getElementById('introSessionNote').textContent = sessionId;
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── BEGIN — assign profile ──
+function begin() {
+  // Curated random — pick randomly from pool
+  assignedProfile = PROFILES[Math.floor(Math.random() * PROFILES.length)];
+  renderProfile();
+  show('profile');
+}
+
+function renderProfile() {
+  const p = assignedProfile;
+  document.getElementById('profileName').textContent = p.name;
+  document.getElementById('profileDescriptor').textContent = p.descriptor;
+  document.getElementById('profileNote').textContent = p.note;
+
+  const fieldsEl = document.getElementById('profileFields');
+  fieldsEl.innerHTML = '';
+  p.fields.forEach(f => {
+    const row = document.createElement('div');
+    row.className = 'profile-field';
+    row.innerHTML = `<div class="pf-label">${f.label}</div><div class="pf-value">${f.value}</div>`;
+    fieldsEl.appendChild(row);
+  });
+}
+
+// ── DILEMMAS ──
+function startDilemmas(mode) {
+  currentMode = mode;
+  currentDilemma = 0;
+  if (mode === 'role') {
+    roleAnswers = DILEMMAS.map(() => ({ stance: null, reason: '' }));
+  } else {
+    selfAnswers = DILEMMAS.map(() => ({ stance: null, reason: '' }));
+  }
+  show('dilemma');
+  renderDilemma(0);
+}
+
+function renderDilemma(index) {
+  currentDilemma = index;
+  selectedStance = currentMode === 'role'
+    ? roleAnswers[index].stance
+    : selfAnswers[index].stance;
+
+  const d = DILEMMAS[index];
+  const total = DILEMMAS.length;
+  const isRole = currentMode === 'role';
+  const isLast = index === total - 1;
+
+  document.getElementById('progFill').style.width =
+    ((isRole ? 0 : total) + index + 1) / (total * 2) * 100 + '%';
+
+  document.getElementById('hudMode').textContent = isRole ? 'In role' : 'As yourself';
+  document.getElementById('hudMode').className = 'hud-mode ' + (isRole ? 'role-mode' : 'self-mode');
+  document.getElementById('hudWho').textContent = isRole ? assignedProfile.name : 'You';
+  document.getElementById('hudCounter').textContent = `Dilemma ${index + 1} of ${total}`;
+
+  const reminder = document.getElementById('roleReminder');
+  if (isRole) {
+    reminder.className = 'role-reminder';
+    reminder.innerHTML = `Answering as <strong>${assignedProfile.name}</strong> — ${assignedProfile.descriptor}. Reason from their position, their constraints, their stakes.`;
+  } else {
+    reminder.className = 'role-reminder hidden';
+  }
+
+  document.getElementById('nextBtn').textContent = isLast
+    ? (isRole ? 'Complete role section →' : 'Complete →')
+    : 'Next →';
+  document.getElementById('nextBtn').disabled = true;
+  document.getElementById('navNote').textContent = 'Position and reasoning both required.';
+
+  const dtEl = document.getElementById('dilemmaText');
+  const dcEl = document.getElementById('dilemmaContext');
+  const ssEl = document.getElementById('stanceSection');
+
+  dtEl.classList.remove('visible');
+  dcEl.classList.remove('visible');
+  reminder.classList.remove('visible');
+  ssEl.classList.remove('visible');
+
+  setTimeout(() => {
+    dtEl.textContent = d.q;
+    dcEl.textContent = d.context;
+    dtEl.classList.add('visible');
+    setTimeout(() => dcEl.classList.add('visible'), 100);
+    setTimeout(() => {
+      if (isRole) reminder.classList.add('visible');
+      buildStances(d, index);
+      ssEl.classList.add('visible');
+    }, 200);
+  }, 80);
+}
+
+function buildStances(d, index) {
+  const opts = document.getElementById('stanceOptions');
+  opts.innerHTML = '';
+
+  d.stances.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'stance-btn';
+    btn.textContent = s.label;
+    btn.dataset.stance = s.id;
+
+    if (selectedStance === s.id) {
+      btn.classList.add(`selected-${s.id}`);
+    }
+
+    btn.addEventListener('click', () => {
+      opts.querySelectorAll('.stance-btn').forEach(b => {
+        b.className = 'stance-btn';
+      });
+      btn.classList.add(`selected-${s.id}`);
+      selectedStance = s.id;
+      checkDilemmaComplete(index);
+    });
+
+    opts.appendChild(btn);
+  });
+
+  const reasonEl = document.getElementById('reasonInput');
+  reasonEl.className = 'reason-input ' + (currentMode === 'role' ? 'role-input' : 'self-input');
+  reasonEl.value = currentMode === 'role'
+    ? roleAnswers[index].reason
+    : selfAnswers[index].reason;
+  document.getElementById('reasonHint').textContent =
+    reasonEl.value.trim().length < 20 ? 'keep going' : '';
+}
+
+function onReasonType() {
+  const val = document.getElementById('reasonInput').value;
+  if (currentMode === 'role') roleAnswers[currentDilemma].reason = val;
+  else selfAnswers[currentDilemma].reason = val;
+  document.getElementById('reasonHint').textContent = val.trim().length < 20 ? 'keep going' : '';
+  checkDilemmaComplete(currentDilemma);
+}
+
+function checkDilemmaComplete(index) {
+  const reason = document.getElementById('reasonInput').value.trim();
+  document.getElementById('nextBtn').disabled = !(selectedStance && reason.length >= 20);
+}
+
+function nextDilemma() {
+  // Save
+  const reason = document.getElementById('reasonInput').value;
+  if (currentMode === 'role') {
+    roleAnswers[currentDilemma] = { stance: selectedStance, reason };
+  } else {
+    selfAnswers[currentDilemma] = { stance: selectedStance, reason };
+  }
+
+  if (currentDilemma === DILEMMAS.length - 1) {
+    if (currentMode === 'role') {
+      show('transition');
+    } else {
+      readContract();
+    }
+  } else {
+    renderDilemma(currentDilemma + 1);
+  }
+}
+
+// ── READ THE CONTRACT ──
+async function readContract() {
+  document.getElementById('progFill').style.width = '100%';
+  show('reading');
+
+  const profile = assignedProfile;
+  const profileStr = profile.fields.map(f => `${f.label}: ${f.value}`).join('\n');
+
+  const dilemmaRecord = DILEMMAS.map((d, i) => {
+    const r = roleAnswers[i];
+    const s = selfAnswers[i];
+    const rTag = !r.reason ? ' [empty]' : r.reason.length < 15 ? ' [minimal]' : '';
+    const sTag = !s.reason ? ' [empty]' : s.reason.length < 15 ? ' [minimal]' : '';
+    return `Dilemma ${i+1}: ${d.q}\n  In role (${profile.name}): [${r.stance || 'no stance'}] ${r.reason}${rTag}\n  As self: [${s.stance || 'no stance'}] ${s.reason}${sTag}`;
+  }).join('\n\n');
+
+  const prompt = `You have administered SOCIAL CONTRACT, a civic simulation instrument, to a student aged 16–18.
+
+The student was assigned this civic profile:
+Name: ${profile.name}
+${profileStr}
+Context: ${profile.note}
+
+The student then answered five civic dilemmas twice — once as the assigned profile, once as themselves. Here is the complete record:
+
+${dilemmaRecord}
+
+Your task is to read the gap between the two sets of answers as an analysis of the student's political imagination — not as proof of how structural position actually shapes civic reasoning, but as evidence of how this student models and imagines it does.
+
+The central insight of this instrument: this is a simulation of political imagination. The student is not an asylum seeker, a CEO, or a single parent. They are performing their understanding of those positions. That performance is the data.
+
+Rules:
+1. Read the PATTERN of differences across all five dilemmas. Where do the role answers and self answers consistently diverge? Where are they surprisingly similar?
+2. ROLE INHABITATION: examine whether the student actually inhabited the assigned profile, or whether their own values and assumptions bled into the role answers. A student playing the asylum seeker who supports harsh immigration restriction is not demonstrating how asylum seekers reason — they are demonstrating the limits of their imagination or empathy. Name this directly when it occurs.
+3. When answers differ significantly, ask: what does the student's model of the profile's position reveal about how they understand structural inequality? What assumptions are embedded in how they imagined the role?
+4. When answers are similar, that too is data. Did the student's own position happen to align with the profile? Did they fail to fully inhabit the role? Or does the similarity reveal something about which civic positions the student sees as universal versus positional?
+5. [empty] and [minimal] answers are primary data — what a student couldn't or wouldn't justify from a particular position is worth naming.
+6. Do not moralize about which positions are correct. Analyse what the pattern of imagination reveals.
+7. Do not use therapeutic language. This is political and structural analysis.
+8. Write in second person, directly to the student. Do not begin with 'You'.
+9. The final sentence should locate the student in what their imagination revealed — not direct them somewhere.
+
+Output format — exactly:
+
+HEADLINE:
+[4–8 words. Names the central finding about this student's political imagination — what the gap between their two sets of answers reveals about how they model civic inequality.]
+
+READING:
+[200–270 words. Analyses the pattern of differences as evidence of political imagination. Names which dilemmas produced the largest gaps and what those gaps reveal about the student's model of structural position. Examines whether the student fully inhabited the role or whether their own assumptions bled through. Notes where answers were similar and what that means. Does not resolve.]
+
+SIGNATURE:
+[One sentence. The most specific thing this record reveals about how this student imagines structural position shapes civic reasoning — traceable to at least two of their answers.]
+
+DISCUSSION:
+Q1: [Derived from the dilemma that most clearly shows where the student's own assumptions bled into the role answers]
+Q2: [Derived from a dilemma where the role and self answers were surprisingly similar — and what that might mean about what the student sees as universal versus positional]
+Q3: [Derived from what the student's model of the assigned profile reveals about their understanding of structural inequality]`;
+
+  try {
+    const resp = await fetch(PROXY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1100,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content.map(b => b.text || '').join('');
+
+    const headlineMatch  = text.match(/HEADLINE:\s*([\s\S]+?)(?=READING:|$)/i);
+    const readingMatch   = text.match(/READING:\s*([\s\S]+?)(?=SIGNATURE:|$)/i);
+    const signatureMatch = text.match(/SIGNATURE:\s*([\s\S]+?)(?=DISCUSSION:|$)/i);
+    const discMatch      = text.match(/DISCUSSION:\s*([\s\S]+)/i);
+
+    showResult(
+      headlineMatch  ? headlineMatch[1].trim()  : '—',
+      readingMatch   ? readingMatch[1].trim()   : text,
+      signatureMatch ? signatureMatch[1].trim() : '',
+      discMatch      ? discMatch[1].trim()      : ''
+    );
+  } catch(err) {
+    showResult('—', 'The reading could not be completed. The civic record remains.', '', '');
+  }
+}
+
+function showResult(headline, reading, signature, discussion) {
+  show('result');
+
+  const now = new Date();
+  document.getElementById('resultStamp').textContent =
+    sessionId + '\n' +
+    assignedProfile.name + ' / Self\n' +
+    now.toLocaleDateString('en-GB') + ' ' +
+    now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  // Build comparison table
+  const container = document.getElementById('comparison');
+  container.innerHTML = '';
+
+  DILEMMAS.forEach((d, i) => {
+    const r = roleAnswers[i];
+    const s = selfAnswers[i];
+
+    const entry = document.createElement('div');
+    entry.className = 'comp-dilemma';
+
+    const header = document.createElement('div');
+    header.className = 'comp-header';
+    const qEl = document.createElement('div');
+    qEl.className = 'comp-q';
+    qEl.textContent = d.q.length > 100 ? d.q.slice(0, 97) + '…' : d.q;
+    const num = document.createElement('div');
+    num.className = 'comp-num';
+    num.textContent = `Dilemma ${i+1}`;
+    header.appendChild(qEl); header.appendChild(num);
+
+    const cols = document.createElement('div');
+    cols.className = 'comp-cols';
+
+    const makeCol = (cls, labelText, answer) => {
+      const col = document.createElement('div');
+      col.className = `comp-col ${cls}`;
+      const lbl = document.createElement('div');
+      lbl.className = 'comp-col-label';
+      lbl.textContent = labelText;
+      const stance = document.createElement('div');
+      stance.className = `comp-stance stance-${answer.stance || 'qualify'}`;
+      stance.textContent = answer.stance ? answer.stance.toUpperCase() : '—';
+      const reason = document.createElement('div');
+      reason.className = 'comp-reason';
+      reason.textContent = answer.reason || '[no answer]';
+      col.appendChild(lbl); col.appendChild(stance); col.appendChild(reason);
+      return col;
+    };
+
+    const div = document.createElement('div');
+    div.className = 'comp-col-divider';
+
+    cols.appendChild(makeCol('role-col', `As ${assignedProfile.name}`, r));
+    cols.appendChild(div);
+    cols.appendChild(makeCol('self-col', 'As yourself', s));
+
+    entry.appendChild(header); entry.appendChild(cols);
+    container.appendChild(entry);
+  });
+
+  setTimeout(() => container.classList.add('visible'), 200);
+
+  setTimeout(() => {
+    document.getElementById('analysisRule').classList.add('visible');
+    setTimeout(() => {
+      document.getElementById('analysisLabel').classList.add('visible');
+      document.getElementById('analysisHeadline').textContent = headline;
+      document.getElementById('analysisBody').textContent = reading;
+      document.getElementById('analysisSig').textContent = signature;
+      setTimeout(() => document.getElementById('analysisHeadline').classList.add('visible'), 200);
+      setTimeout(() => document.getElementById('analysisBody').classList.add('visible'), 700);
+      setTimeout(() => document.getElementById('analysisSig').classList.add('visible'), 1500);
+    }, 400);
+  }, 1400);
+
+  if (discussion) {
+    const list = document.getElementById('discList');
+    list.innerHTML = '';
+    discussion.split('\n').filter(l => l.trim()).forEach((line, i) => {
+      const cleaned = line.replace(/^Q\d+:\s*/i, '').trim();
+      if (!cleaned) return;
+      const item = document.createElement('div');
+      item.className = 'disc-item';
+      const num = document.createElement('div');
+      num.className = 'disc-num'; num.textContent = String(i+1).padStart(2,'0');
+      const q = document.createElement('div');
+      q.className = 'disc-q'; q.textContent = cleaned;
+      item.appendChild(num); item.appendChild(q);
+      list.appendChild(item);
+    });
+    setTimeout(() => document.getElementById('discWrap').classList.add('visible'), 3800);
+  }
+
+  setTimeout(() => document.getElementById('resultFooter').classList.add('visible'), 4600);
+}
+
+function restart() {
+  assignedProfile = null; currentMode = 'role';
+  currentDilemma = 0; selectedStance = null;
+  roleAnswers = DILEMMAS.map(() => ({ stance: null, reason: '' }));
+  selfAnswers = DILEMMAS.map(() => ({ stance: null, reason: '' }));
+
+  document.getElementById('progFill').style.width = '0%';
+  document.getElementById('comparison').innerHTML = '';
+  document.getElementById('discList').innerHTML = '';
+  ['comparison','analysisRule','analysisLabel','analysisHeadline',
+   'analysisBody','analysisSig','discWrap','resultFooter']
+    .forEach(id => document.getElementById(id).classList.remove('visible'));
+
+  show('intro');
+}
+</script>
+</body>
+</html>
